@@ -1,0 +1,78 @@
+import math
+
+
+
+
+import unicodedata
+
+def remove_accents(text):
+    """Supprime les accents, apostrophes et espaces du texte."""
+    text = text.replace("'", "").replace(" ", "")  # Supprime les apostrophes et espaces
+    return ''.join(c for c in unicodedata.normalize('NFD', text) if unicodedata.category(c) != 'Mn')
+
+    
+def cryptTranspo(texte, cle):
+    """Chiffrement par transposition complexe avec une clé"""
+    # Supprimer les espaces du texte
+    texte = texte.replace(" ", "")
+
+    # Déterminer la taille de la grille
+    nb_col = len(cle)
+    nb_lignes = math.ceil(len(texte) / nb_col)
+
+    # Compléter le texte avec 'X' si nécessaire
+    texte += 'X' * (nb_lignes * nb_col - len(texte))
+
+    # Remplir la grille
+    grille = []
+    index = 0
+    for _ in range(nb_lignes):
+        grille.append(list(texte[index:index + nb_col]))
+        index += nb_col
+
+    # Déterminer l'ordre des colonnes en triant la clé alphabétiquement
+    ordre = sorted(range(len(cle)), key=lambda k: cle[k])
+
+    # Lire les colonnes dans l'ordre déterminé
+    texte_chiffre = ""
+    for col in ordre:
+        for ligne in grille:
+            texte_chiffre += ligne[col]
+
+    return texte_chiffre
+
+def decryptTranspo(texte_chiffre, cle):
+    """Déchiffrement par transposition complexe"""
+    nb_col = len(cle)
+    nb_lignes = math.ceil(len(texte_chiffre) / nb_col)
+
+    # Déterminer l'ordre des colonnes en triant la clé alphabétiquement
+    ordre = sorted(range(len(cle)), key=lambda k: cle[k])
+
+    # Construire une grille vide
+    grille = [[''] * nb_col for _ in range(nb_lignes)]
+
+    # Remplir la grille colonne par colonne
+    index = 0
+    for col in ordre:
+        for ligne in range(nb_lignes):
+            if index < len(texte_chiffre):
+                grille[ligne][col] = texte_chiffre[index]
+                index += 1
+
+    # Lire la grille ligne par ligne
+    texte_dechiffre = ''.join(''.join(ligne) for ligne in grille)
+
+    return texte_dechiffre.rstrip('X')  # Supprimer les 'X' ajoutés au remplissage
+
+# Exemple
+message = "TUER Le ROI DEMAIN A MINUIT"
+cle = "CRIME"
+
+# Chiffrement
+message_chiffre = cryptTranspo(message, cle)
+print("Message chiffré :", message_chiffre)
+
+# Déchiffrement
+message_dechiffre = decryptTranspo(message_chiffre, cle)
+print("Message déchiffré :", message_dechiffre)
